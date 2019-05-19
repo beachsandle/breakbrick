@@ -68,6 +68,7 @@
     <Compile Include="Assets\2D_ColorsBall\Script\PlayerManager.cs" />
     <Compile Include="Assets\MyScript\BallCollision.cs" />
     <Compile Include="Assets\MyScript\BrickCollision.cs" />
+    <Compile Include="Assets\MyScript\GameController.cs" />
     <Compile Include="Assets\MyScript\MoveBar.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/Users/kirix/Desktop/MWS/beachsandle/BreakBrick/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
