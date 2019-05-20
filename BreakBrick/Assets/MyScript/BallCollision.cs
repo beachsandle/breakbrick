@@ -1,30 +1,108 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class Extention
 {
+    public static Vector3 Projected(this Vector3 vec1, Vector3 vec2)
+    {
+        return new Vector3(vec1.x * vec2.x, vec1.y * vec2.y, vec1.z * vec2.z);
+    }
     public static float GetAngle(this Vector3 vec)
     {
-        return Vector3.Angle(Vector3.up, vec);
+        return Vector3.Angle(Vector3.right, vec);
     }
 }
 public class BallCollision : MonoBehaviour
 {
+    private Rigidbody2D rb2d;
     private Collision2D RecentCollision = null;
     private Vector3 Angle = new Vector3(0f, 1f);
     public float Speed = 5;
+    public float Attak = 1;
 
 
     void Start()
     {
+        rb2d = GetComponent<Rigidbody2D>();
 
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        transform.position += transform.rotation * Angle * Speed * Time.deltaTime;
+        rb2d.velocity = Quaternion.Euler(0, 0, rb2d.rotation) * Vector2.right * Speed;
+        //transform.position += transform.rotation * Angle * Speed * Time.deltaTime;
+    }
+    private void Collosion2(Collision2D coll)
+    {
+        var ballColl = GetComponent<CircleCollider2D>();
+        if (coll.gameObject.CompareTag("Bottom"))
+        {
+            Destroy(gameObject);
+        } else
+        if (coll.gameObject.CompareTag("Player"))
+        {
+            var ballCenter = ballColl.bounds.center;
+            var boxColl = coll.collider;
+            var boxCenter = boxColl.bounds.center;
+            var boxExtents = boxColl.bounds.extents;
+            var moveAngle = transform.rotation.eulerAngles.z;
+            var ballCenterToBoxCenter = boxCenter - ballCenter;
+            var inLeft = ballCenter.x < boxCenter.x;
+            var inTop = ballCenter.y > boxCenter.y;
+            var inXSide = Math.Abs(ballCenterToBoxCenter.x) > boxExtents.x;
+            var inYSide = Math.Abs(ballCenterToBoxCenter.y) > boxExtents.y;
+            float contactAngle;
+            var collidedToVertex = inXSide && inYSide;
+            if (collidedToVertex)
+            {
+                var vertex = boxCenter;
+                vertex.x += boxExtents.x * (inLeft ? -1 : 1);
+                vertex.y += boxExtents.y * (inTop ? 1 : -1);
+                contactAngle = (vertex - ballCenter).GetAngle();
+
+            }
+            else
+            {
+                contactAngle = inXSide ? (inLeft ? 0f : 180f) : (inTop ? 90f : 270f);
+                contactAngle += (boxCenter.x - ballCenter.x) / boxExtents.x * 30f;
+            }
+            var reflectAngle = 90f - moveAngle + contactAngle;
+            rb2d.rotation = (moveAngle + reflectAngle * 2) % 360;
+        }
+        else
+        if (coll.gameObject.CompareTag("Brick"))
+        {
+
+            var ballCenter = ballColl.bounds.center;
+            var boxColl = coll.collider;
+            var boxCenter = boxColl.bounds.center;
+            var boxExtents = boxColl.bounds.extents;
+            var moveAngle = transform.rotation.eulerAngles.z;
+            var ballCenterToBoxCenter = boxCenter - ballCenter;
+            var inLeft = ballCenter.x < boxCenter.x;
+            var inTop = ballCenter.y > boxCenter.y;
+            var inXSide = Math.Abs(ballCenterToBoxCenter.x) > boxExtents.x;
+            var inYSide = Math.Abs(ballCenterToBoxCenter.y) > boxExtents.y;
+            float contactAngle;
+            var collidedToVertex = inXSide && inYSide;
+            if (collidedToVertex)
+            {
+                var vertex = boxCenter;
+                vertex.x += boxExtents.x * (inLeft ? -1 : 1);
+                vertex.y += boxExtents.y * (inTop ? 1 : -1);
+                contactAngle = (vertex - ballCenter).GetAngle();
+
+            }
+            else
+            {
+                contactAngle = inXSide ? (inLeft ? 0f : 180f) : (inTop ? 90f : 270f);
+            }
+            var reflectAngle = 90f - moveAngle + contactAngle;
+            rb2d.rotation = (moveAngle + reflectAngle * 2) % 360;
+        }
     }
     private void OnCollision(Collision2D coll)
     {
@@ -36,14 +114,10 @@ public class BallCollision : MonoBehaviour
         var reflectAngle = 90 - moveAngle + contactAngle;
         moveAngle += reflectAngle * 2;
         moveAngle %= 360;
-        transform.rotation = Quaternion.Euler(0, 0, moveAngle);
+        rb2d.rotation = moveAngle;
     }
     private void OnCollisionEnter2D(Collision2D coll)
     {
-        OnCollision(coll);
-    }
-    private void OnCollisionStay2D(Collision2D coll)
-    {
-        OnCollision(coll);
+        Collosion2(coll);
     }
 }

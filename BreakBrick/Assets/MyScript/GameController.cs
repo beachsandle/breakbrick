@@ -19,11 +19,11 @@ public class GameController : MonoBehaviour
 
     void SpawnBrick()
     {
-        for(int x = 0; x < 6; x++)
+        for(int x = 0; x < 8; x++)
         {
             for(int y = 0; y < 3; y++)
             {
-                Instantiate(brick, new Vector3(-2.5f + x, 4.5f - y, 0), Quaternion.identity);
+                Instantiate(brick, new Vector3(-2.64f + x * 0.75f, 2f- y * 0.35f, 0), Quaternion.identity);
             }
         }
     }
