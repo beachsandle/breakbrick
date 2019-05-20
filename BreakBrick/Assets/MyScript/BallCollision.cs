@@ -62,15 +62,29 @@ public class BallCollision : MonoBehaviour
                 vertex.x += boxExtents.x * (inLeft ? -1 : 1);
                 vertex.y += boxExtents.y * (inTop ? 1 : -1);
                 contactAngle = (vertex - ballCenter).GetAngle();
-
+                var reflectAngle = 90f - moveAngle + contactAngle;
+                var lateAngle = (moveAngle + reflectAngle * 2) % 360;
+                if (lateAngle > 170f)
+                    lateAngle = 170f;
+                else if (lateAngle < 10)
+                    lateAngle = 10f;
+                rb2d.rotation = lateAngle;
             }
             else
             {
+                if (!inTop)
+                    return;
                 contactAngle = inXSide ? (inLeft ? 0f : 180f) : (inTop ? 90f : 270f);
-                contactAngle += (boxCenter.x - ballCenter.x) / boxExtents.x * 30f;
+                var reflectAngle = 90f - moveAngle + contactAngle;
+                reflectAngle += (boxCenter.x - ballCenter.x) / boxExtents.x * 30f;
+                var lateAngle = (moveAngle + reflectAngle * 2) % 360;
+                if (lateAngle > 175f)
+                    lateAngle = 175f;
+                else if (lateAngle < 5)
+                    lateAngle = 5f;
+                rb2d.rotation = lateAngle;
             }
-            var reflectAngle = 90f - moveAngle + contactAngle;
-            rb2d.rotation = (moveAngle + reflectAngle * 2) % 360;
+            
         }
         else
         if (coll.gameObject.CompareTag("Brick"))
